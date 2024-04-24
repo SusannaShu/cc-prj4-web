@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel ="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
     <title>Digital Divination</title>
 </head>
 <body>
     <div class="container">
-        <h1>Astronomy on the Day of Your Birth</h1>
-        <form>
+        <h1>Astronomy on the Day of your birth</h1>
+        <form id="birthdateForm">
             <div class="form-group">
                 <label for="birthdate">Birthdate:</label>
-                <input type="date" id="birthdate" name="birthdate">
+                <input type="date" id="birthdate" name="birthdate" required>
             </div>
-            
-            <button type="submit">Submit</button>
+            <button type="submit" id="submitBtn">Submit</button>
         </form>
+        <div class="results"></div>  <!-- Ensure there's a container for results -->
     </div>
     <script src="script.js"></script>
 </body>

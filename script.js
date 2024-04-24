@@ -1,49 +1,53 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
+    const form = document.getElementById('birthdateForm');
+    const submitButton = document.getElementById('submitBtn');
+    const resultsContainer = document.querySelector('.results');
 
     form.addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent the form from submitting in the traditional way
-
+        event.preventDefault();
         const birthdate = document.getElementById('birthdate').value;
+
         if (!birthdate) {
             alert('Please enter a valid birthdate.');
             return;
         }
 
-        const apiKey = 'ZY5p0cAgJhPXW962Uv2nEC1gaL0QrKavID633ClD';
-        const apiUrl = `https://api.nasa.gov/planetary/apod?api_key=${apiKey}&date=${birthdate}`;
+        const birthDateObj = new Date(birthdate);
+        const month = birthDateObj.getMonth() + 1; // JavaScript months are 0-based.
+        const day = birthDateObj.getDate();
+        const year = birthDateObj.getFullYear();
 
-        fetch(apiUrl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.statusText);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.media_type === 'image') {
-                    displayResults(data.url, data.explanation);
-                } else {
-                    displayResults('', 'No image available for this date, possibly a video. Check the website for more!');
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
-                alert('Failed to fetch the image. Please try again.');
-            });
+        const apiKey = 'ZY5p0cAgJhPXW962Uv2nEC1gaL0QrKavID633ClD';
+        const apodUrl = `https://api.nasa.gov/planetary/apod?api_key=${apiKey}&date=${year}-${month}-${day}`;
+        const numbersUrl = `http://numbersapi.com/${month}/${day}/date`;
+
+        Promise.all([
+            fetch(apodUrl).then(response => response.json()),
+            fetch(numbersUrl).then(response => response.text())
+        ])
+        .then(([apodData, numberFact]) => {
+            displayResults(apodData.url, apodData.explanation, numberFact, apodData.media_type);
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            alert('Failed to fetch data. Please try again.');
+        });
+
+        submitButton.textContent = 'Try Again';
     });
 
-    function displayResults(imageUrl, description) {
-        let resultsHtml = `<h2>Result</h2>`;
+    function displayResults(imageUrl, apodDescription, dateFact, mediaType) {
+        let resultsHtml = '<h2>Results</h2>';
 
-        if (imageUrl) {
-            resultsHtml += `<img src="${imageUrl}" alt="Astronomy Picture of the Day" style="max-width:100%;">`;
+        if (mediaType === 'image') {
+            resultsHtml += `<img src="${imageUrl}" alt="Astronomy Picture of the Day" style="height:200px">`;
+        } else {
+            resultsHtml += '<p>No image available for this date, possibly a video. Check the website for more!</p>';
         }
 
-        resultsHtml += `<p>${description}</p>`;
+        resultsHtml += `<p>${apodDescription || 'No description available.'}</p>`;
+        resultsHtml += `<p style="color:blue"><strong>Interesting Date Fact:</strong> ${dateFact}</p>`;
 
-        const resultDiv = document.createElement('div');
-        resultDiv.innerHTML = resultsHtml;
-        document.querySelector('.container').appendChild(resultDiv);
+        resultsContainer.innerHTML = resultsHtml; // Ensure this element is correctly referenced and exists.
     }
 });
